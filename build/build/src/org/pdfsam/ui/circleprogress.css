@@ -1,0 +1,8 @@
+.circleindicator-container  {	
+	circleindicator-color: white;
+	-fx-padding: 5.0;
+}
+.circleindicator-container > .circleindicator-label {
+	-fx-text-fill: transparent;
+
+}
