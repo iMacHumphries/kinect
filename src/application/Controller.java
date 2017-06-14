@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.pdfsam.ui.RingProgressIndicator;
 
+import edu.ufl.digitalworlds.j4k.J4KSDK;
+import edu.ufl.digitalworlds.j4k.Skeleton;
 import javafx.animation.KeyFrame;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
@@ -20,7 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 
-public class Controller {
+public class Controller extends J4KSDK {
 
 	public static final double MILLISECONDS_BEFORE_CLICK = 1500;
 	public static final int UPDATE_SPEED = 10; // millis
@@ -79,6 +81,8 @@ public class Controller {
 
 		addBackMouseListener();
 		addSideImageMouseListeners();
+		
+		start(J4KSDK.COLOR | J4KSDK.DEPTH | J4KSDK.SKELETON);
 	}
 
 	private void initTimer() {
@@ -302,6 +306,40 @@ public class Controller {
 		});
 
 		showCursor();
+	}
+
+	@Override
+	public void onColorFrameEvent(byte[] arg0) {
+		
+	}
+
+	@Override
+	public void onDepthFrameEvent(short[] arg0, byte[] arg1, float[] arg2, float[] arg3) {
+	}
+
+	@Override
+	public void onSkeletonFrameEvent(boolean[] flags, float[] positions, float[] orientations, byte[] states) {
+		System.out.println("called");
+		
+		for (int i = 0; i < getSkeletonCountLimit(); i++) {
+			
+			Skeleton s = Skeleton.getSkeleton(i, flags, positions, orientations, states, this);
+			
+			if (s.isJointTracked(Skeleton.HAND_RIGHT)) {
+				float x = s.get3DJointX(Skeleton.HAND_RIGHT);
+				float y = s.get3DJointY(Skeleton.HAND_RIGHT);
+				
+				try {
+					java.awt.Robot robot = new java.awt.Robot();
+
+				    robot.mouseMove((int)x, (int)y);
+				   
+				} catch (java.awt.AWTException e) {
+				    e.printStackTrace();
+				}
+			}
+			
+		}
 	}
 
 }
