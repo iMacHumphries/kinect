@@ -21,13 +21,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
-import math.Display;
-import math.Matrix4f;
 import math.Vector3f;
+
 
 public class Controller extends J4KSDK {
 
-	public static final float SENSITIVITY = 0.1f;
+	public static final float SENSITIVITY = 0.25f;
 	public static final double MILLISECONDS_BEFORE_CLICK = 1500;
 	public static final int UPDATE_SPEED = 10; // millis
 
@@ -337,31 +336,33 @@ public class Controller extends J4KSDK {
 			if (s.isTracked() && s.isJointTracked(Skeleton.HAND_RIGHT)) {
 				Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 				
-
-				Matrix4f transform = SensorTransforms.sensorToScreenCoordinatesTransform(
-						SensorTransforms.sensorOffsetFromScreenCenter,
-						SensorTransforms.sensorElevationAngleToUse,
-						Display.getScreenWidthMeters(),
-						Display.getScreenHeightMeters(),
-						Display.getScreenWidth(),
-						Display.getScreenHeight());
+//
+//				Matrix4f transform = SensorTransforms.sensorToScreenCoordinatesTransform(
+//						SensorTransforms.sensorOffsetFromScreenCenter,
+//						SensorTransforms.sensorElevationAngleToUse,
+//						Display.getScreenWidthMeters(),
+//						Display.getScreenHeightMeters(),
+//						Display.getScreenWidth(),
+//						Display.getScreenHeight());
+//				
+//				Vector3f pos = SensorTransforms.transformSkeletonPoint(transform,
+//						new Vector3f(
+//								s.get3DJointX(Skeleton.HAND_RIGHT),
+//								s.get3DJointY(Skeleton.HAND_RIGHT),
+//								s.get3DJointZ(Skeleton.HAND_RIGHT)));
 				
-				Vector3f pos = SensorTransforms.transformSkeletonPoint(transform,
-						new Vector3f(
-								s.get3DJointX(Skeleton.HAND_RIGHT),
-								s.get3DJointY(Skeleton.HAND_RIGHT),
-								s.get3DJointZ(Skeleton.HAND_RIGHT)));
 				
-				float headX = pos.x * screenSize.width * 0;
-				float headY = pos.y * screenSize.height * 0;
+				Vector3f pos = new Vector3f(
+						s.get3DJointX(Skeleton.HAND_RIGHT),
+						s.get3DJointY(Skeleton.HAND_RIGHT),
+						s.get3DJointZ(Skeleton.HAND_RIGHT)
+						);
 				
-//				float x = (pos.x * screenSize.width * 2.1f) + headX;
-//				float y = (pos.y * -screenSize.height * 2.5f) + headY;
-				
-				float x = pos.x;
-				float y = pos.y;
+				final float SCREEN_SPACE_CONVERTER = 0.5f;
+				float x = (pos.x * screenSize.width) / SCREEN_SPACE_CONVERTER;
+				float y = (pos.y * -screenSize.height) / SCREEN_SPACE_CONVERTER;
 					
-				System.out.println(x + ", " + y);
+				System.out.println(x + ", " + y + " mouse: " + mouseX + ", " + mouseY);
 				
 				try {
 					java.awt.Robot robot = new java.awt.Robot();
