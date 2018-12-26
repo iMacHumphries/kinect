@@ -37,7 +37,7 @@ public class Main extends Application {
 			try {
 				URL iconURL = Main.class.getResource("./../icon.png");
 				java.awt.Image macIcon = new ImageIcon(iconURL).getImage();
-				com.apple.eawt.Application.getApplication().setDockIconImage(macIcon);
+				//com.apple.eawt.Application.getApplication().setDockIconImage(macIcon);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
