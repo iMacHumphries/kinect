@@ -1,3 +1,11 @@
 .DS_STORE
 *.class
-
+tmp/**
+tmp/**/*
+*.tmp
+bin/**
+*target*
+.metadata
+.metadata/**
+.project
+.classpath
