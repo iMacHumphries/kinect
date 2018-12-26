@@ -41,6 +41,10 @@ public class Main extends Application {
 			} catch (Exception e) {
 			}
 			
+			stage.setOnCloseRequest(e -> {
+				controller.onClose();
+			});
+			
 			stage.show();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -21,14 +21,20 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
+import math.Display;
+import math.Matrix4f;
+import math.Vector3f;
 
 public class Controller extends J4KSDK {
 
+	public static final float SENSITIVITY = 0.1f;
 	public static final double MILLISECONDS_BEFORE_CLICK = 1500;
 	public static final int UPDATE_SPEED = 10; // millis
 
 	private Scene scene;
-
+	private int mouseX;
+	private int mouseY;
+	
 	@FXML
 	BorderPane borderPane;
 	@FXML
@@ -82,6 +88,7 @@ public class Controller extends J4KSDK {
 		addBackMouseListener();
 		addSideImageMouseListeners();
 		
+		SensorTransforms.sensorElevationAngleToUse = this.getElevationAngle();
 		start(J4KSDK.COLOR | J4KSDK.DEPTH | J4KSDK.SKELETON);
 	}
 
@@ -301,6 +308,8 @@ public class Controller extends J4KSDK {
 		double center = indicator.getInnerCircleRadius() + indicator.getRingWidth();
 
 		scene.addEventFilter(MouseEvent.ANY, e -> {
+			mouseX = (int)e.getSceneX();
+			mouseY = (int)e.getSceneY();
 			indicator.setTranslateX(e.getSceneX() - center - gridStackPane.getLayoutX());
 			indicator.setTranslateY(e.getSceneY() - center - gridStackPane.getLayoutY());
 		});
@@ -319,20 +328,45 @@ public class Controller extends J4KSDK {
 
 	@Override
 	public void onSkeletonFrameEvent(boolean[] flags, float[] positions, float[] orientations, byte[] states) {
-		System.out.println("called");
-		
 		for (int i = 0; i < getSkeletonCountLimit(); i++) {
 			
 			Skeleton s = Skeleton.getSkeleton(i, flags, positions, orientations, states, this);
 			
-			if (s.isJointTracked(Skeleton.HAND_RIGHT)) {
-				float x = s.get3DJointX(Skeleton.HAND_RIGHT);
-				float y = s.get3DJointY(Skeleton.HAND_RIGHT);
+			
+			
+			if (s.isTracked() && s.isJointTracked(Skeleton.HAND_RIGHT)) {
+				Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+				
+
+				Matrix4f transform = SensorTransforms.sensorToScreenCoordinatesTransform(
+						SensorTransforms.sensorOffsetFromScreenCenter,
+						SensorTransforms.sensorElevationAngleToUse,
+						Display.getScreenWidthMeters(),
+						Display.getScreenHeightMeters(),
+						Display.getScreenWidth(),
+						Display.getScreenHeight());
+				
+				Vector3f pos = SensorTransforms.transformSkeletonPoint(transform,
+						new Vector3f(
+								s.get3DJointX(Skeleton.HAND_RIGHT),
+								s.get3DJointY(Skeleton.HAND_RIGHT),
+								s.get3DJointZ(Skeleton.HAND_RIGHT)));
+				
+				float headX = pos.x * screenSize.width * 0;
+				float headY = pos.y * screenSize.height * 0;
+				
+//				float x = (pos.x * screenSize.width * 2.1f) + headX;
+//				float y = (pos.y * -screenSize.height * 2.5f) + headY;
+				
+				float x = pos.x;
+				float y = pos.y;
+					
+				System.out.println(x + ", " + y);
 				
 				try {
 					java.awt.Robot robot = new java.awt.Robot();
 
-				    robot.mouseMove((int)x, (int)y);
+				    robot.mouseMove((int)lerp(mouseX, x, SENSITIVITY), (int)lerp(mouseY, y, SENSITIVITY));
 				   
 				} catch (java.awt.AWTException e) {
 				    e.printStackTrace();
@@ -341,5 +375,14 @@ public class Controller extends J4KSDK {
 			
 		}
 	}
+	
+	float lerp(float a, float b, float f)
+	{
+	    return a + f * (b - a);
+	}
 
+	public void onClose() {
+		this.stop();
+	}
+	
 }
