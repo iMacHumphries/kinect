@@ -25,7 +25,7 @@ import javafx.util.Duration;
 public class Controller extends J4KSDK {
 
 	public static final double MILLISECONDS_BEFORE_CLICK = 1500;
-	public static final int UPDATE_SPEED = 10; // ms
+	public static final int UPDATE_SPEED = 10; // millis
 
 	private Scene scene;
 
@@ -127,7 +127,7 @@ public class Controller extends J4KSDK {
 	private void display(FileDisplay root) {
 
 		boolean oneOrFewerChildren = root.getChildrenFileDisplays().size() <= 1;
-		int totalCells = grid.getColumnCount() * grid.getRowCount();
+		int totalCells = GridPaneSize.cellCount(grid);
 
 		boolean shouldShowRightIndicator = (root.getCountCousin() > 0 && oneOrFewerChildren)
 				|| root.getChildrenFileDisplays().size() - (totalCells * pageIndex) > totalCells;
@@ -153,8 +153,8 @@ public class Controller extends J4KSDK {
 			}
 
 			// Center image.
-			GridPane.setColumnSpan(display, grid.getColumnCount());
-			GridPane.setRowSpan(display, grid.getRowCount());
+			GridPane.setColumnSpan(display, GridPaneSize.getGridCols(grid));
+			GridPane.setRowSpan(display, GridPaneSize.getGridRows(grid));
 
 			// Enlarge image.
 			display.fitWidthProperty().bind(grid.widthProperty().divide(1.15));
@@ -176,9 +176,9 @@ public class Controller extends J4KSDK {
 
 		List<FileDisplay> children = root.getChildrenFileDisplays();
 
-		int childIndex = pageIndex * grid.getRowCount() * grid.getColumnCount();
-		int cols = grid.getColumnCount();
-		int rows = grid.getRowCount();
+		int childIndex = pageIndex * GridPaneSize.cellCount(grid);
+		int cols = GridPaneSize.getGridCols(grid);
+		int rows = GridPaneSize.getGridRows(grid);
 
 		int startRow = 0;
 		int startCol = 0;
@@ -309,13 +309,18 @@ public class Controller extends J4KSDK {
 	}
 
 	@Override
-	public void onColorFrameEvent(byte[] arg0) {}
+	public void onColorFrameEvent(byte[] arg0) {
+		
+	}
 
 	@Override
-	public void onDepthFrameEvent(short[] arg0, byte[] arg1, float[] arg2, float[] arg3) {}
+	public void onDepthFrameEvent(short[] arg0, byte[] arg1, float[] arg2, float[] arg3) {
+	}
 
 	@Override
 	public void onSkeletonFrameEvent(boolean[] flags, float[] positions, float[] orientations, byte[] states) {
+		System.out.println("called");
+		
 		for (int i = 0; i < getSkeletonCountLimit(); i++) {
 			
 			Skeleton s = Skeleton.getSkeleton(i, flags, positions, orientations, states, this);
@@ -326,7 +331,9 @@ public class Controller extends J4KSDK {
 				
 				try {
 					java.awt.Robot robot = new java.awt.Robot();
+
 				    robot.mouseMove((int)x, (int)y);
+				   
 				} catch (java.awt.AWTException e) {
 				    e.printStackTrace();
 				}
